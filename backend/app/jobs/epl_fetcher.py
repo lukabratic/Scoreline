@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.clients import api_football, football_data
 from app.db import SessionLocal
 from app.models import EPLGameEvent, Game, League, Season, Team
+from app.scoring.epl import calculate_epl_game_score
 
 RED_CARD_DETAILS = {"Red Card", "Yellow Card / Red Card"}
 
@@ -151,19 +152,28 @@ def fetch_epl_games(start_date: date, end_date: date) -> None:
             af_home_id = af_team_id_by_external_id.get(home_external_id)
             af_away_id = af_team_id_by_external_id.get(away_external_id)
 
-            if fd_match["status"] == "FINISHED" and af_home_id and af_away_id:
-                fixture_id = api_football.find_fixture_id(
-                    date.fromisoformat(fd_match["utcDate"][:10]), year, af_home_id, af_away_id
+            if fd_match["status"] == "FINISHED":
+                home_team = teams_by_external_id[home_external_id]
+                away_team = teams_by_external_id[away_external_id]
+
+                if af_home_id and af_away_id:
+                    fixture_id = api_football.find_fixture_id(
+                        date.fromisoformat(fd_match["utcDate"][:10]), year, af_home_id, af_away_id
+                    )
+                    if fixture_id is not None:
+                        try:
+                            enrich_epl_events(db, game, fixture_id, home_team, away_team, af_home_id, af_away_id)
+                        except Exception as exc:
+                            print(f"[epl_fetcher] event enrichment failed for game {game.external_id}: {exc}")
+                    else:
+                        print(f"[epl_fetcher] no API-Football fixture for game {game.external_id} on {fd_match['utcDate'][:10]}")
+
+                # Score with whatever events exist (possibly none, if enrichment above didn't
+                # find a fixture) — home_score/away_score are always reliable from football-data.org.
+                events = db.query(EPLGameEvent).filter_by(game_id=game.id).all()
+                game.game_score, game.game_score_breakdown = calculate_epl_game_score(
+                    game, events, home_team, away_team
                 )
-                if fixture_id is not None:
-                    try:
-                        home_team = teams_by_external_id[home_external_id]
-                        away_team = teams_by_external_id[away_external_id]
-                        enrich_epl_events(db, game, fixture_id, home_team, away_team, af_home_id, af_away_id)
-                    except Exception as exc:
-                        print(f"[epl_fetcher] event enrichment failed for game {game.external_id}: {exc}")
-                else:
-                    print(f"[epl_fetcher] no API-Football fixture for game {game.external_id} on {fd_match['utcDate'][:10]}")
 
             db.commit()
     finally:

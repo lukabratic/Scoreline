@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.clients import balldontlie
 from app.db import SessionLocal
 from app.models import Game, League, NBAGameStats, Season, Team
+from app.scoring.nba import calculate_nba_game_score
 
 NBA_COM_SLEEP_SECONDS = 0.6
 
@@ -138,6 +139,9 @@ def enrich_nba_stats(db: Session, game: Game, nba_game_id: str, overtime_periods
     stats.overtime_periods = overtime_periods
     stats.top_performer_id = str(top_side["playerPtsLeaderId"])
     stats.top_performer_pts = int(top_side["playerPtsLeaderPts"])
+
+    game.game_score, game.game_score_breakdown = calculate_nba_game_score(game, stats)
+
     db.flush()
 
 

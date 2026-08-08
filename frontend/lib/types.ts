@@ -10,7 +10,6 @@ export interface LeagueRecord {
 
 export interface Season {
   id: number;
-  league_id: number;
   year: number;
   label: string;
   start_date: string;
@@ -19,34 +18,29 @@ export interface Season {
 
 export interface Team {
   id: number;
-  league_id: number;
   name: string;
   short_name: string;
   logo_url: string | null;
-  external_id: string;
 }
 
 export type GameStatus = "scheduled" | "final";
 
-export interface Game {
+export interface GameListItem {
   id: number;
   season_id: number;
-  home_team_id: number;
-  away_team_id: number;
   date: string;
   status: GameStatus;
+  home_team: Team;
+  away_team: Team;
   home_score: number | null;
   away_score: number | null;
-  external_id: string;
   is_playoff: boolean;
-  playoff_round: string | null;
-  // Computed and stored at fetch time by the pipeline — null until build-order step 3 runs.
+  // Computed and stored at fetch time by the pipeline — null until a game has been scored.
   game_score: number | null;
   game_score_breakdown: string[] | null;
 }
 
 export interface NBAGameStats {
-  game_id: number;
   lead_changes: number | null;
   times_tied: number | null;
   largest_deficit_overcome: number | null;
@@ -58,17 +52,13 @@ export interface NBAGameStats {
 export type EPLEventType = "goal" | "red_card" | "penalty";
 
 export interface EPLGameEvent {
-  id: number;
-  game_id: number;
   minute: number;
   event_type: EPLEventType;
   team_id: number;
 }
 
-export interface UserRating {
-  id: number;
-  user_id: string;
-  game_id: number;
-  score: number;
-  created_at: string;
+export interface GameDetail extends GameListItem {
+  playoff_round: string | null;
+  nba_stats: NBAGameStats | null;
+  epl_events: EPLGameEvent[];
 }
