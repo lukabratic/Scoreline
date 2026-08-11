@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     balldontlie_api_key: str = ""
     football_data_api_key: str = ""
     api_football_key: str = ""
+    supabase_jwt_secret: str = ""
+    frontend_origin: str = "http://localhost:3000"
 
 
 settings = Settings()

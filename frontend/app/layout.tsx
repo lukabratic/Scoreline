@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import { LeagueSwitcher } from "@/components/LeagueSwitcher";
+import { AuthWidget } from "@/components/AuthWidget";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,7 +23,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Link href="/" className="text-lg font-semibold tracking-tight">
             Scoreline
           </Link>
-          <LeagueSwitcher />
+          <div className="flex items-center gap-4">
+            <LeagueSwitcher />
+            <AuthWidget />
+          </div>
         </header>
         <main className="flex-1">{children}</main>
       </body>

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getLeagueSeasons, getTeam, getTeamSeasonGames } from "@/lib/api";
 import type { League } from "@/lib/types";
-import { SeasonArcGraph } from "@/components/SeasonArcGraph";
+import { SeasonFilters } from "@/components/SeasonFilters";
 
 export default async function TeamSeasonPage(
   props: PageProps<"/[league]/team/[teamId]/season/[seasonId]">
@@ -31,7 +31,7 @@ export default async function TeamSeasonPage(
         <p className="text-sm text-muted-foreground">{season.label} season arc</p>
       </div>
       <div className="rounded-xl border border-border bg-surface p-6">
-        <SeasonArcGraph team={team} games={games} />
+        <SeasonFilters team={team} games={games} />
       </div>
     </div>
   );

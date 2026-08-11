@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LeagueOut(BaseModel):
@@ -46,6 +46,8 @@ class GameListItemOut(BaseModel):
     is_playoff: bool
     game_score: float | None
     game_score_breakdown: list[str] | None
+    community_score: float | None
+    community_rating_count: int
 
 
 class NBAGameStatsOut(BaseModel):
@@ -71,3 +73,18 @@ class GameDetailOut(GameListItemOut):
     playoff_round: str | None
     nba_stats: NBAGameStatsOut | None
     epl_events: list[EPLGameEventOut]
+
+
+class RatingIn(BaseModel):
+    score: float = Field(ge=1, le=10)
+
+
+class UserRatingOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    score: float
+
+
+class RatingSummaryOut(BaseModel):
+    average: float | None
+    count: int

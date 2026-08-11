@@ -38,6 +38,9 @@ export interface GameListItem {
   // Computed and stored at fetch time by the pipeline — null until a game has been scored.
   game_score: number | null;
   game_score_breakdown: string[] | null;
+  // Aggregated from UserRating rows at read time — null/0 until at least one person has rated it.
+  community_score: number | null;
+  community_rating_count: number;
 }
 
 export interface NBAGameStats {
@@ -61,4 +64,13 @@ export interface GameDetail extends GameListItem {
   playoff_round: string | null;
   nba_stats: NBAGameStats | null;
   epl_events: EPLGameEvent[];
+}
+
+export interface RatingSummary {
+  average: number | null;
+  count: number;
+}
+
+export interface UserRatingRecord {
+  score: number;
 }

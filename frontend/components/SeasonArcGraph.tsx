@@ -36,6 +36,23 @@ function GraphDot(props: DotItemDotProps) {
   );
 }
 
+function CommunityDot(props: DotItemDotProps) {
+  const { cx, cy, payload } = props;
+  if (cx === undefined || cy === undefined || (payload as GameListItem).community_score === null) {
+    return null;
+  }
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={3}
+      fill="var(--color-community)"
+      stroke="var(--color-background)"
+      strokeWidth={1.5}
+    />
+  );
+}
+
 function GraphTooltip({
   active,
   payload,
@@ -64,6 +81,13 @@ function GraphTooltip({
         </div>
       </div>
       <ScoreBreakdownList breakdown={game.game_score_breakdown} />
+      <p className="mt-2 text-xs text-muted-foreground">
+        {game.community_score !== null
+          ? `Community: ${game.community_score.toFixed(1)} (${game.community_rating_count} rating${
+              game.community_rating_count === 1 ? "" : "s"
+            })`
+          : "No community ratings yet"}
+      </p>
     </div>
   );
 }
@@ -80,45 +104,67 @@ export function SeasonArcGraph({ team, games }: SeasonArcGraphProps) {
   }
 
   return (
-    <div className="h-80 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={points} margin={{ top: 16, right: 16, bottom: 0, left: -16 }}>
-          <XAxis
-            dataKey="date"
-            tickFormatter={(value: string) =>
-              new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" })
-            }
-            stroke="var(--color-muted-foreground)"
-            fontSize={12}
-            tickLine={false}
-          />
-          <YAxis
-            domain={[0, 10]}
-            stroke="var(--color-muted-foreground)"
-            fontSize={12}
-            tickLine={false}
-            axisLine={false}
-            width={28}
-          />
-          <Tooltip
-            content={(props) => (
-              <GraphTooltip
-                active={props.active}
-                payload={props.payload as unknown as { payload: GameListItem }[] | undefined}
-                teamId={team.id}
-              />
-            )}
-          />
-          <Line
-            dataKey="game_score"
-            stroke="var(--color-accent)"
-            strokeWidth={2}
-            dot={(props) => <GraphDot key={props.index} {...props} />}
-            activeDot={{ r: 6 }}
-            isAnimationActive={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <span className="h-0.5 w-3 rounded-full" style={{ backgroundColor: "var(--color-accent)" }} />
+          Game Score
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="h-0.5 w-3 rounded-full" style={{ backgroundColor: "var(--color-community)" }} />
+          Community
+        </span>
+      </div>
+      <div className="h-80 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={points} margin={{ top: 16, right: 16, bottom: 0, left: -16 }}>
+            <XAxis
+              dataKey="date"
+              tickFormatter={(value: string) =>
+                new Date(value).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+              }
+              stroke="var(--color-muted-foreground)"
+              fontSize={12}
+              tickLine={false}
+            />
+            <YAxis
+              domain={[0, 10]}
+              stroke="var(--color-muted-foreground)"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              width={28}
+            />
+            <Tooltip
+              content={(props) => (
+                <GraphTooltip
+                  active={props.active}
+                  payload={props.payload as unknown as { payload: GameListItem }[] | undefined}
+                  teamId={team.id}
+                />
+              )}
+            />
+            <Line
+              dataKey="game_score"
+              stroke="var(--color-accent)"
+              strokeWidth={2}
+              dot={(props) => <GraphDot key={props.index} {...props} />}
+              activeDot={{ r: 6 }}
+              isAnimationActive={false}
+            />
+            <Line
+              dataKey="community_score"
+              stroke="var(--color-community)"
+              strokeWidth={2}
+              strokeDasharray="4 3"
+              dot={(props) => <CommunityDot key={props.index} {...props} />}
+              activeDot={{ r: 5 }}
+              connectNulls={false}
+              isAnimationActive={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

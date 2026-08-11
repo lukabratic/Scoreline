@@ -13,6 +13,7 @@ dependencies = [
     "python-dotenv>=1.0",
     "requests>=2.32",
     "nba_api>=1.5",
+    "pyjwt>=2.9",
 ]
 
 [tool.uv]

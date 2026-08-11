@@ -4,6 +4,7 @@ import { getGame } from "@/lib/api";
 import type { League } from "@/lib/types";
 import { GameScoreBadge } from "@/components/GameScoreBadge";
 import { ScoreBreakdownList } from "@/components/ScoreBreakdownList";
+import { RatingWidget } from "@/components/RatingWidget";
 
 export default async function GamePage(props: PageProps<"/[league]/game/[gameId]">) {
   const { league, gameId } = await props.params;
@@ -45,6 +46,8 @@ export default async function GamePage(props: PageProps<"/[league]/game/[gameId]
         <GameScoreBadge score={game.game_score} size="lg" />
         <ScoreBreakdownList breakdown={game.game_score_breakdown} className="max-w-sm" />
       </div>
+
+      <RatingWidget gameId={game.id} />
 
       <section>
         <h2 className="mb-4 text-lg font-semibold">Key stats</h2>

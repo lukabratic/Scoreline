@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Game, League, Season, Team
+from app.rating_stats import attach_community_scores
 from app.schemas import GameListItemOut, LeagueOut, SeasonOut, TeamOut
 
 router = APIRouter(tags=["leagues"])
@@ -35,7 +36,7 @@ def list_teams(slug: str, db: Session = Depends(get_db)):
 @router.get("/leagues/{slug}/games/recent", response_model=list[GameListItemOut])
 def list_recent_games(slug: str, limit: int = 10, db: Session = Depends(get_db)):
     league = _get_league_or_404(slug, db)
-    return (
+    games = (
         db.query(Game)
         .join(Season, Game.season_id == Season.id)
         .filter(Season.league_id == league.id)
@@ -43,3 +44,4 @@ def list_recent_games(slug: str, limit: int = 10, db: Session = Depends(get_db))
         .limit(limit)
         .all()
     )
+    return attach_community_scores(games, db)
